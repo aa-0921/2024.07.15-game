@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const restartButton = document.getElementById('restartButton'); // リスタートボタンの取得
 
 // プレイヤーの設定
 const player = {
@@ -114,6 +115,9 @@ function gameLoop() {
     ctx.fillStyle = 'red';
     ctx.font = '40px Arial';
     ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2);
+
+    // リスタートボタンの表示
+    restartButton.style.display = 'block';
     return;
   }
 
@@ -163,6 +167,22 @@ function gameLoop() {
   }
 
   frameCount++;
+  requestAnimationFrame(gameLoop);
+}
+
+// ゲームリスタート関数
+function restartGame() {
+  // 初期状態にリセット
+  player.x = canvas.width / 2 - 25;
+  player.y = canvas.height / 2 - 25;
+  obstacles.length = 0; // 障害物をクリア
+  obstacleFrequency = initialObstacleFrequency;
+  frameCount = 0;
+  score = 0;
+  gameOver = false;
+  restartButton.style.display = 'none'; // リスタートボタンを隠す
+
+  // ゲームループの再開
   requestAnimationFrame(gameLoop);
 }
 

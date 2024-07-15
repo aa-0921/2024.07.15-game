@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>正方形画面のゲーム</title>
-  <style>
-    canvas {
-      border: 1px solid black;
-      display: block;
-      margin: 0 auto;
-    }
-
-    #restartButton {
-      display: none;
-      margin: 20px auto;
-      display: block;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゲーム</title>
+    <style>
+        canvas {
+            background-color: #f0f0f0;
+            display: block;
+            margin: 0 auto;
+        }
+        #restartButton {
+            display: none;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="600" height="600"></canvas>
-  <button id="restartButton">リスタート</button>
-  <script src="game.js"></script>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <button id="restartButton" onclick="restartGame()">Restart</button>
+    <script src="game.js"></script>
 </body>
 </html>
