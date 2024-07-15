@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const game = new Game(canvas, scoreBoard, startButton, restartButton);
 
   startButton.addEventListener('click', () => {
-    startButton.style.display = 'none';
     game.initGame();
+    startButton.style.display = 'none';
   });
 
   restartButton.addEventListener('click', () => {
