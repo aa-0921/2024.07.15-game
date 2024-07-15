@@ -47,6 +47,10 @@ document.addEventListener('keyup', (e) => {
   if (e.key === 'ArrowDown') keys.down = false;
 });
 
+// 画像の読み込み
+const gameOverImage = new Image();
+gameOverImage.src = 'image.png';
+
 // 障害物の生成
 function generateObstacle() {
   const size = Math.random() * 30 + 20;
@@ -124,9 +128,22 @@ function checkCollision(a, b) {
 // ゲームループ
 function gameLoop() {
   if (gameOver) {
+    // 画像を画面全体に表示
+    ctx.drawImage(gameOverImage, 0, 0, canvas.width, canvas.height);
+
+    // ゲームオーバーの文字を表示
     ctx.fillStyle = 'black';
     ctx.font = '50px Arial';
-    ctx.fillText('Game Over', canvas.width / 2 - 150, canvas.height / 2);
+    ctx.fillText('Game Over', canvas.width / 2 - 150, canvas.height / 2 - 30);
+
+    // 最終スコアを表示
+    const finalScore = score + bonusScore;
+    ctx.font = '30px Arial';
+    ctx.fillText(
+      `Final Score: ${finalScore}`,
+      canvas.width / 2 - 110,
+      canvas.height / 2 + 20
+    );
 
     // リスタートボタンの表示
     restartButton.style.display = 'block';
