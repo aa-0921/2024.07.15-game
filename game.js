@@ -1,6 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreBoard = document.getElementById('scoreBoard'); // スコアボードの取得
+const startButton = document.getElementById('startButton'); // スタートボタンの取得
 const restartButton = document.getElementById('restartButton'); // リスタートボタンの取得
 
 // プレイヤーの設定
@@ -199,7 +200,7 @@ function gameLoop() {
     if (checkCollision(player, bonusPoints[i])) {
       bonusScore += 100; // スコアに100ポイント加算
       bonusCount++; // ボーナスポイントの取得数を加算
-      bonusPoints.splice(i, 1);
+      bonusPoints.splice(i, 1); // 取得されたボーナスポイントを削除
       i--;
     }
   }
@@ -218,23 +219,35 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-// ゲームリスタート関数
-function restartGame() {
-  // 初期状態にリセット
+// ゲームの初期化
+function initGame() {
   player.x = canvas.width / 2 - 25;
   player.y = canvas.height / 2 - 25;
-  obstacles.length = 0; // 障害物をクリア
-  bonusPoints.length = 0; // ボーナスポイントをクリア
+  obstacles.length = 0;
+  bonusPoints.length = 0;
   score = 0;
   bonusScore = 0;
-  bonusCount = 0; // ボーナスカウントをリセット
+  bonusCount = 0;
   frameCount = 0;
-  obstacleFrequency = initialObstacleFrequency;
   gameOver = false;
+  obstacleFrequency = initialObstacleFrequency;
+  scoreBoard.innerText = `Score: ${score} + Bonus: ${bonusScore}`;
   restartButton.style.display = 'none';
-  scoreBoard.textContent = `Score: 0 + Bonus: 0 x 100`;
   gameLoop();
 }
 
-// ゲーム開始
-gameLoop();
+// スタートボタンのクリックイベント
+startButton.addEventListener('click', () => {
+  startButton.style.display = 'none';
+  initGame();
+});
+
+// リスタートボタンのクリックイベント
+restartButton.addEventListener('click', () => {
+  initGame();
+});
+
+// ゲームの初期状態を設定
+ctx.fillStyle = 'black';
+ctx.font = '30px Arial';
+ctx.fillText('Press Start to Play', canvas.width / 2 - 150, canvas.height / 2);

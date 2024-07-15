@@ -16,9 +16,10 @@
       margin-top: 10px;
     }
 
+    #startButton,
     #restartButton {
       display: none;
-      margin: 0 auto;
+      margin: 10px auto;
       display: block;
     }
   </style>
@@ -26,6 +27,7 @@
 <body>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
   <div id="scoreBoard">Score: 0</div>
+  <button id="startButton" onclick="startGame()">Start</button>
   <button id="restartButton" onclick="restartGame()">Restart</button>
 
   <script src="game.js"></script>
