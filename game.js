@@ -23,6 +23,7 @@ let frameCount = 0;
 let score = 0;
 let gameOver = false;
 let bonusScore = 0; // 取得したボーナスポイント数
+let bonusCount = 0; // 取得したボーナスポイントの数
 
 // キーの状態を追跡
 const keys = {
@@ -123,9 +124,9 @@ function checkCollision(a, b) {
 // ゲームループ
 function gameLoop() {
   if (gameOver) {
-    ctx.fillStyle = 'red';
-    ctx.font = '40px Arial';
-    ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2);
+    ctx.fillStyle = 'black';
+    ctx.font = '50px Arial';
+    ctx.fillText('Game Over', canvas.width / 2 - 150, canvas.height / 2);
 
     // リスタートボタンの表示
     restartButton.style.display = 'block';
@@ -180,6 +181,7 @@ function gameLoop() {
   for (let i = 0; i < bonusPoints.length; i++) {
     if (checkCollision(player, bonusPoints[i])) {
       bonusScore += 100;
+      bonusCount++; // ボーナスカウントを増加
       bonusPoints.splice(i, 1);
       i--;
     }
@@ -187,7 +189,7 @@ function gameLoop() {
 
   // スコアの更新と描画
   score++;
-  scoreBoard.textContent = `Score: ${score + bonusScore}`; // スコアボードの更新
+  scoreBoard.textContent = `Score: ${score} + Bonus: ${bonusCount} x 100`; // スコアボードの更新
 
   // 障害物生成頻度の調整
   if (frameCount % 600 === 0 && obstacleFrequency > 10) {
@@ -206,16 +208,16 @@ function restartGame() {
   player.y = canvas.height / 2 - 25;
   obstacles.length = 0; // 障害物をクリア
   bonusPoints.length = 0; // ボーナスポイントをクリア
-  obstacleFrequency = initialObstacleFrequency;
-  frameCount = 0;
   score = 0;
-  bonusScore = 0; // ボーナスポイントをリセット
+  bonusScore = 0;
+  bonusCount = 0; // ボーナスカウントをリセット
+  frameCount = 0;
+  obstacleFrequency = initialObstacleFrequency;
   gameOver = false;
-  restartButton.style.display = 'none'; // リスタートボタンを隠す
-
-  // ゲームループの再開
-  requestAnimationFrame(gameLoop);
+  restartButton.style.display = 'none';
+  scoreBoard.textContent = `Score: 0 + Bonus: 0 x 100`;
+  gameLoop();
 }
 
-// ゲームループの開始
+// ゲーム開始
 gameLoop();
