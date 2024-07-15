@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const scoreBoard = document.getElementById('scoreBoard'); // スコアボードの取得
 const restartButton = document.getElementById('restartButton'); // リスタートボタンの取得
 
 // プレイヤーの設定
@@ -186,9 +187,7 @@ function gameLoop() {
 
   // スコアの更新と描画
   score++;
-  ctx.fillStyle = 'black';
-  ctx.font = '20px Arial';
-  ctx.fillText(`Score: ${score}`, 10, 20);
+  scoreBoard.textContent = `Score: ${score + bonusScore}`; // スコアボードの更新
 
   // 障害物生成頻度の調整
   if (frameCount % 600 === 0 && obstacleFrequency > 10) {
