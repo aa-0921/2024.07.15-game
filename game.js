@@ -197,8 +197,8 @@ function gameLoop() {
   // ボーナスポイントの取得判定
   for (let i = 0; i < bonusPoints.length; i++) {
     if (checkCollision(player, bonusPoints[i])) {
-      bonusScore += 100;
-      bonusCount++; // ボーナスカウントを増加
+      bonusScore += 100; // スコアに100ポイント加算
+      bonusCount++; // ボーナスポイントの取得数を加算
       bonusPoints.splice(i, 1);
       i--;
     }
