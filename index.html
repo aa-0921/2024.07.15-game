@@ -3,33 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ゲーム</title>
+  <title>Simple Game</title>
   <style>
-    #gameCanvas {
+    canvas {
       border: 1px solid black;
-      display: block;
-      margin: 0 auto;
     }
 
-    #scoreBoard {
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    #startButton,
     #restartButton {
       display: none;
-      margin: 10px auto;
-      display: block;
     }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <div id="scoreBoard">Score: 0</div>
-  <button id="startButton" onclick="startGame()">Start</button>
-  <button id="restartButton" onclick="restartGame()">Restart</button>
-
-  <script src="game.js"></script>
+  <div id="scoreBoard">Score: 0 + Bonus: 0</div>
+  <button id="startButton">Start</button>
+  <button id="restartButton">Restart</button>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

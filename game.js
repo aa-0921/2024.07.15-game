@@ -1,253 +1,209 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const scoreBoard = document.getElementById('scoreBoard'); // スコアボードの取得
-const startButton = document.getElementById('startButton'); // スタートボタンの取得
-const restartButton = document.getElementById('restartButton'); // リスタートボタンの取得
+import { Player } from './player.js';
+import { Obstacle } from './obstacle.js';
+import { BonusPoint } from './bonusPoint.js';
 
-// プレイヤーの設定
-const player = {
-  x: canvas.width / 2 - 25,
-  y: canvas.height / 2 - 25,
-  width: 50,
-  height: 50,
-  speed: 5,
-};
+export class Game {
+  constructor(canvas, scoreBoard, startButton, restartButton) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.scoreBoard = scoreBoard;
+    this.startButton = startButton;
+    this.restartButton = restartButton;
 
-// 障害物の設定
-const obstacles = [];
-const bonusPoints = []; // ボーナスポイントの設定
-const initialObstacleFrequency = 30; // 初期の障害物生成頻度（今の倍の速さ）
-let obstacleFrequency = initialObstacleFrequency;
-let frameCount = 0;
+    this.player = new Player(canvas.width / 2 - 25, canvas.height / 2 - 25);
+    this.obstacles = [];
+    this.bonusPoints = [];
+    this.initialObstacleFrequency = 30;
+    this.obstacleFrequency = this.initialObstacleFrequency;
+    this.frameCount = 0;
+    this.score = 0;
+    this.gameOver = false;
+    this.bonusScore = 0;
+    this.bonusCount = 0;
+    this.keys = {
+      right: false,
+      left: false,
+      up: false,
+      down: false,
+    };
 
-// スコアの設定
-let score = 0;
-let gameOver = false;
-let bonusScore = 0; // 取得したボーナスポイント数
-let bonusCount = 0; // 取得したボーナスポイントの数
+    this.gameOverImage = new Image();
+    this.gameOverImage.src = 'image.png';
 
-// キーの状態を追跡
-const keys = {
-  right: false,
-  left: false,
-  up: false,
-  down: false,
-};
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight') keys.right = true;
-  if (e.key === 'ArrowLeft') keys.left = true;
-  if (e.key === 'ArrowUp') keys.up = true;
-  if (e.key === 'ArrowDown') keys.down = true;
-});
-
-document.addEventListener('keyup', (e) => {
-  if (e.key === 'ArrowRight') keys.right = false;
-  if (e.key === 'ArrowLeft') keys.left = false;
-  if (e.key === 'ArrowUp') keys.up = false;
-  if (e.key === 'ArrowDown') keys.down = false;
-});
-
-// 画像の読み込み
-const gameOverImage = new Image();
-gameOverImage.src = 'image.png';
-
-// 障害物の生成
-function generateObstacle() {
-  const size = Math.random() * 30 + 20;
-  const side = Math.floor(Math.random() * 4);
-  let x, y, speedX, speedY;
-
-  switch (side) {
-    case 0: // 上から
-      x = Math.random() * canvas.width;
-      y = -size;
-      speedX = (Math.random() - 0.5) * 10;
-      speedY = Math.random() * 5 + 2;
-      break;
-    case 1: // 右から
-      x = canvas.width + size;
-      y = Math.random() * canvas.height;
-      speedX = -(Math.random() * 5 + 2);
-      speedY = (Math.random() - 0.5) * 10;
-      break;
-    case 2: // 下から
-      x = Math.random() * canvas.width;
-      y = canvas.height + size;
-      speedX = (Math.random() - 0.5) * 10;
-      speedY = -(Math.random() * 5 + 2);
-      break;
-    case 3: // 左から
-      x = -size;
-      y = Math.random() * canvas.height;
-      speedX = Math.random() * 5 + 2;
-      speedY = (Math.random() - 0.5) * 10;
-      break;
+    document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    document.addEventListener('keyup', (e) => this.handleKeyUp(e));
   }
 
-  obstacles.push({ x, y, width: size, height: size, speedX, speedY });
-}
+  handleKeyDown(e) {
+    if (e.key === 'ArrowRight') this.keys.right = true;
+    if (e.key === 'ArrowLeft') this.keys.left = true;
+    if (e.key === 'ArrowUp') this.keys.up = true;
+    if (e.key === 'ArrowDown') this.keys.down = true;
+  }
 
-// ボーナスポイントの生成
-function generateBonusPoint() {
-  const size = 20;
-  const x = Math.random() * (canvas.width - size);
-  const y = Math.random() * (canvas.height - size);
-  bonusPoints.push({ x, y, width: size, height: size });
-}
+  handleKeyUp(e) {
+    if (e.key === 'ArrowRight') this.keys.right = false;
+    if (e.key === 'ArrowLeft') this.keys.left = false;
+    if (e.key === 'ArrowUp') this.keys.up = false;
+    if (e.key === 'ArrowDown') this.keys.down = false;
+  }
 
-// 障害物の更新
-function updateObstacles() {
-  for (let i = 0; i < obstacles.length; i++) {
-    const obs = obstacles[i];
-    obs.x += obs.speedX;
-    obs.y += obs.speedY;
+  generateObstacle() {
+    const size = Math.random() * 30 + 20;
+    const side = Math.floor(Math.random() * 4);
+    let x, y, speedX, speedY;
 
-    // 障害物が画面外に出た場合
-    if (
-      obs.x < -obs.width ||
-      obs.x > canvas.width + obs.width ||
-      obs.y < -obs.height ||
-      obs.y > canvas.height + obs.height
-    ) {
-      obstacles.splice(i, 1);
-      i--;
+    switch (side) {
+      case 0: // 上から
+        x = Math.random() * this.canvas.width;
+        y = -size;
+        speedX = (Math.random() - 0.5) * 10;
+        speedY = Math.random() * 5 + 2;
+        break;
+      case 1: // 右から
+        x = this.canvas.width + size;
+        y = Math.random() * this.canvas.height;
+        speedX = -(Math.random() * 5 + 2);
+        speedY = (Math.random() - 0.5) * 10;
+        break;
+      case 2: // 下から
+        x = Math.random() * this.canvas.width;
+        y = this.canvas.height + size;
+        speedX = (Math.random() - 0.5) * 10;
+        speedY = -(Math.random() * 5 + 2);
+        break;
+      case 3: // 左から
+        x = -size;
+        y = Math.random() * this.canvas.height;
+        speedX = Math.random() * 5 + 2;
+        speedY = (Math.random() - 0.5) * 10;
+        break;
+    }
+
+    this.obstacles.push(new Obstacle(x, y, size, size, speedX, speedY));
+  }
+
+  generateBonusPoint() {
+    const size = 20;
+    const x = Math.random() * (this.canvas.width - size);
+    const y = Math.random() * (this.canvas.height - size);
+    this.bonusPoints.push(new BonusPoint(x, y, size, size));
+  }
+
+  updateObstacles() {
+    for (let i = 0; i < this.obstacles.length; i++) {
+      const obs = this.obstacles[i];
+      obs.update();
+
+      if (obs.isOutOfCanvas(this.canvas)) {
+        this.obstacles.splice(i, 1);
+        i--;
+      }
     }
   }
-}
 
-// 衝突判定
-function checkCollision(a, b) {
-  return (
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
-  );
-}
-
-// ゲームループ
-function gameLoop() {
-  if (gameOver) {
-    // 画像を画面全体に表示
-    ctx.drawImage(gameOverImage, 0, 0, canvas.width, canvas.height);
-
-    // ゲームオーバーの文字を表示
-    ctx.fillStyle = 'black';
-    ctx.font = '50px Arial';
-    ctx.fillText('Game Over', canvas.width / 2 - 150, canvas.height / 2 - 30);
-
-    // 最終スコアを表示
-    const finalScore = score + bonusScore;
-    ctx.font = '30px Arial';
-    ctx.fillText(
-      `Final Score: ${finalScore}`,
-      canvas.width / 2 - 110,
-      canvas.height / 2 + 20
+  checkCollision(a, b) {
+    return (
+      a.x < b.x + b.width &&
+      a.x + a.width > b.x &&
+      a.y < b.y + b.height &&
+      a.y + a.height > b.y
     );
-
-    // リスタートボタンの表示
-    restartButton.style.display = 'block';
-    return;
   }
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  gameLoop() {
+    if (this.gameOver) {
+      this.ctx.drawImage(
+        this.gameOverImage,
+        0,
+        0,
+        this.canvas.width,
+        this.canvas.height
+      );
 
-  // プレイヤーの動き
-  if (keys.right && player.x + player.width < canvas.width)
-    player.x += player.speed;
-  if (keys.left && player.x > 0) player.x -= player.speed;
-  if (keys.up && player.y > 0) player.y -= player.speed;
-  if (keys.down && player.y + player.height < canvas.height)
-    player.y += player.speed;
+      this.ctx.fillStyle = 'black';
+      this.ctx.font = '50px Arial';
+      this.ctx.fillText(
+        'Game Over',
+        this.canvas.width / 2 - 150,
+        this.canvas.height / 2 - 30
+      );
 
-  // プレイヤーの描画
-  ctx.fillStyle = 'blue';
-  ctx.fillRect(player.x, player.y, player.width, player.height);
+      const finalScore = this.score + this.bonusScore;
+      this.ctx.font = '30px Arial';
+      this.ctx.fillText(
+        `Final Score: ${finalScore}`,
+        this.canvas.width / 2 - 110,
+        this.canvas.height / 2 + 20
+      );
 
-  // 障害物の生成と更新
-  if (frameCount % obstacleFrequency === 0) {
-    generateObstacle();
-  }
-  updateObstacles();
-
-  // ボーナスポイントの生成
-  if (frameCount % 500 === 0) {
-    generateBonusPoint();
-  }
-
-  // 障害物の描画
-  ctx.fillStyle = 'red';
-  obstacles.forEach((obs) => {
-    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-  });
-
-  // ボーナスポイントの描画
-  ctx.fillStyle = 'pink';
-  bonusPoints.forEach((bonus) => {
-    ctx.fillRect(bonus.x, bonus.y, bonus.width, bonus.height);
-  });
-
-  // 衝突判定
-  obstacles.forEach((obs) => {
-    if (checkCollision(player, obs)) {
-      gameOver = true;
+      this.restartButton.style.display = 'block';
+      return;
     }
-  });
 
-  // ボーナスポイントの取得判定
-  for (let i = 0; i < bonusPoints.length; i++) {
-    if (checkCollision(player, bonusPoints[i])) {
-      bonusScore += 100; // スコアに100ポイント加算
-      bonusCount++; // ボーナスポイントの取得数を加算
-      bonusPoints.splice(i, 1); // 取得されたボーナスポイントを削除
-      i--;
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (
+      this.keys.right &&
+      this.player.x + this.player.width < this.canvas.width
+    )
+      this.player.moveRight();
+    if (this.keys.left && this.player.x > 0) this.player.moveLeft();
+    if (this.keys.up && this.player.y > 0) this.player.moveUp();
+    if (
+      this.keys.down &&
+      this.player.y + this.player.height < this.canvas.height
+    )
+      this.player.moveDown();
+
+    this.player.draw(this.ctx);
+
+    if (this.frameCount % this.obstacleFrequency === 0) this.generateObstacle();
+    this.updateObstacles();
+
+    if (this.frameCount % 500 === 0) this.generateBonusPoint();
+
+    this.ctx.fillStyle = 'red';
+    this.obstacles.forEach((obs) => obs.draw(this.ctx));
+
+    this.ctx.fillStyle = 'pink';
+    this.bonusPoints.forEach((bonus) => bonus.draw(this.ctx));
+
+    this.obstacles.forEach((obs) => {
+      if (this.checkCollision(this.player, obs)) {
+        this.gameOver = true;
+      }
+    });
+
+    for (let i = 0; i < this.bonusPoints.length; i++) {
+      if (this.checkCollision(this.player, this.bonusPoints[i])) {
+        this.bonusScore += 100;
+        this.bonusCount++;
+        this.bonusPoints.splice(i, 1);
+        i--;
+      }
     }
+
+    this.score++;
+    this.scoreBoard.innerText = `Score: ${this.score} + Bonus: ${this.bonusScore}`;
+
+    this.frameCount++;
+    requestAnimationFrame(() => this.gameLoop());
   }
 
-  // スコアの更新と描画
-  score++;
-  scoreBoard.textContent = `Score: ${score} + Bonus: ${bonusCount} x 100`; // スコアボードの更新
-
-  // 障害物生成頻度の調整
-  if (frameCount % 600 === 0 && obstacleFrequency > 10) {
-    // 10秒ごとに障害物生成頻度を増加
-    obstacleFrequency -= 10; // 今の倍の速さで増加
+  initGame() {
+    this.player.x = this.canvas.width / 2 - 25;
+    this.player.y = this.canvas.height / 2 - 25;
+    this.obstacles = [];
+    this.bonusPoints = [];
+    this.frameCount = 0;
+    this.score = 0;
+    this.gameOver = false;
+    this.bonusScore = 0;
+    this.bonusCount = 0;
+    this.obstacleFrequency = this.initialObstacleFrequency;
+    this.restartButton.style.display = 'none';
+    this.scoreBoard.innerText = `Score: 0 + Bonus: 0`;
+    this.gameLoop();
   }
-
-  frameCount++;
-  requestAnimationFrame(gameLoop);
 }
-
-// ゲームの初期化
-function initGame() {
-  player.x = canvas.width / 2 - 25;
-  player.y = canvas.height / 2 - 25;
-  obstacles.length = 0;
-  bonusPoints.length = 0;
-  score = 0;
-  bonusScore = 0;
-  bonusCount = 0;
-  frameCount = 0;
-  gameOver = false;
-  obstacleFrequency = initialObstacleFrequency;
-  scoreBoard.innerText = `Score: ${score} + Bonus: ${bonusScore}`;
-  restartButton.style.display = 'none';
-  gameLoop();
-}
-
-// スタートボタンのクリックイベント
-startButton.addEventListener('click', () => {
-  startButton.style.display = 'none';
-  initGame();
-});
-
-// リスタートボタンのクリックイベント
-restartButton.addEventListener('click', () => {
-  initGame();
-});
-
-// ゲームの初期状態を設定
-ctx.fillStyle = 'black';
-ctx.font = '30px Arial';
-ctx.fillText('Press Start to Play', canvas.width / 2 - 150, canvas.height / 2);
