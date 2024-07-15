@@ -48,6 +48,27 @@ export class Game {
     if (e.key === 'ArrowDown') this.keys.down = false;
   }
 
+  movePlayer(direction) {
+    if (direction === 'up' && this.player.y > 0) {
+      this.player.moveUp();
+    }
+    if (
+      direction === 'down' &&
+      this.player.y + this.player.height < this.canvas.height
+    ) {
+      this.player.moveDown();
+    }
+    if (direction === 'left' && this.player.x > 0) {
+      this.player.moveLeft();
+    }
+    if (
+      direction === 'right' &&
+      this.player.x + this.player.width < this.canvas.width
+    ) {
+      this.player.moveRight();
+    }
+  }
+
   generateObstacle() {
     const size = Math.random() * 30 + 20;
     const side = Math.floor(Math.random() * 4);
